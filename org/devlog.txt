@@ -1,0 +1,23 @@
+SarahY -- 2017-03-26 8PM
+   * Sketch data visualization
+
+JordanY -- 2017-03-27 9PM
+   * Update README to include brief description of project
+
+SarahY -- 2017-03-29 3AM
+   * Write up Design Document
+
+NalaS -- 2017-03-29 ?PM
+   * Write barebones app.py
+   * Write parser.py
+
+SarahY -- 2017-03-30 2AM
+   * Write basic home.html
+   * Write base.js, with fake data
+      * formatted slightly differently from what Nala's parser returns
+      * does not read in from json yet, will once json format settled
+      * color-coding based on region works
+      * boolean "highlight" determines transparency
+      * plot(year) where year is an int works
+      * no axis labels/title/legends/etc.
+
