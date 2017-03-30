@@ -9,7 +9,7 @@ var dataset =
 	    {
 		"country": "Dummy",
 		"total": 0,
-		"apprehended": 1,
+		"inadmissible": 1,
 		"naturalized": 1,
 		"highlight": false,
 		"region": ""
@@ -17,7 +17,7 @@ var dataset =
 	    {
 		"country": "Canada",
 		"total": 500,
-		"apprehended": 0.1,
+		"inadmissible": 0.1,
 		"naturalized": 0.9,
 		"highlight": false,
 		"region": "North America"
@@ -25,7 +25,7 @@ var dataset =
 	    {
 		"country": "Egypt",
 		"total": 382,
-		"apprehended": 0.38,
+		"inadmissible": 0.38,
 		"naturalized": 0.62,
 		"highlight": true,
 		"region": "North Africa"
@@ -71,7 +71,7 @@ var plot = function(year) {
             return xScale(d["naturalized"]);
 	})
 	.attr("cy", function(d) {
-            return yScale(d["apprehended"]);
+            return yScale(d["inadmissible"]);
 	})
 	.attr("fill", function(d) {
 	    return regionColors[d["region"]];
