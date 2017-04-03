@@ -1,8 +1,4 @@
-var svg = d3.select("#svg");
-
-var w = 850;
-var h = 550;
-
+//Dummy test data
 var dataset =
     {
 	"2005": [
@@ -30,6 +26,33 @@ var dataset =
 		"highlight": true,
 		"region": "North Africa"
 	    }
+	],
+        
+    "2050": [
+	    {
+		"country": "Dummy",
+		"total": 100,
+		"inadmissible": .7,
+		"naturalized": 1,
+		"highlight": false,
+		"region": ""
+	    },
+	    {
+		"country": "Canada",
+		"total": 7000,
+		"inadmissible": 0.35,
+		"naturalized": 0.6,
+		"highlight": false,
+		"region": "North America"
+	    },
+	    {
+		"country": "Egypt",
+		"total": 3824,
+		"inadmissible": 0.66,
+		"naturalized": 0.31,
+		"highlight": true,
+		"region": "North Africa"
+	    }
 	]
     };
 
@@ -54,15 +77,37 @@ var regionColors =
     };
 //This can be reduced to continents though idrc
 
-var xScale = d3.scale.linear()
+
+//Takes an array from the dataset (aka 1 year) and
+//sorts it by <prop> in descending 
+var prop = "total";
+//.sort(function(a, b, prop){
+//    return parseInt(b.prop) - parseInt(a.prop);
+//};
+
+
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////
+
+
+var svg = d3.select("#svg");
+
+var w = 850;
+var h = 550;
+
+var xScale = d3.scaleLinear()
     .domain([0, 1])
     .range([0, w]);
 
-var yScale = d3.scale.linear()
+var yScale = d3.scaleLinear()
     .domain([0, 1])
     .range([h, 0]);
 
+
+
 var plot = function(year) {
+    ///*
     svg.selectAll("circle")
 	.data(dataset[year.toString()])
 	.enter()
@@ -77,8 +122,9 @@ var plot = function(year) {
 	    return regionColors[d["region"]];
 	})
 	.attr("stroke", function(d) {
-	    return regionColors[d["region"]];
-	})
+	    //return regionColors[d["region"]];
+	    return "black";
+    })
 	.attr("fill-opacity", function(d) {
 	    if (d["highlight"] == true) {
 		return 1;
@@ -91,19 +137,38 @@ var plot = function(year) {
 	    return d["total"]/10;
 	});
 
-    var formatAsPercentage = d3.format(".1%");
-
-    var xAxis = d3.svg.axis().scale(xScale).orient("bottom");
-    var yAxis = d3.svg.axis().scale(yScale).orient("left");
-
+    //*/
+    
+    
+    
+    
+    //////////////////////////////////////////////////////////////
+    //////////////////////////////////////////////////////////////
+    //Axes
+    
     svg.append("g")
 	.attr("class", "axis")
 	.attr("transform", "translate(0," + h + ")")
-	.call(xAxis.tickFormat(formatAsPercentage));
+	.call(d3.axisBottom(xScale).ticks(10, "%"));
+    
+    svg.append("text")             
+      .attr("transform",
+            "translate(" + (w/2) + " ," + 
+                           (h + 40) + ")")
+      .style("text-anchor", "middle")
+      .text("% Something");
 
     svg.append("g")
 	.attr("class", "axis")
-	.call(yAxis.tickFormat(formatAsPercentage));
+	.call(d3.axisLeft(yScale).ticks(10, "%"));
+    
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", -65)
+      .attr("x", -(h / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("% Something");      
 
 };
 
