@@ -107,12 +107,15 @@ var yScale = d3.scaleLinear()
 
 var plot = function(year) {
     ///*
+
+    var data = interpolateData(year);
+    
     svg.selectAll("circle")
 	.data(dataset[year.toString()])
 	.enter()
 	.append("circle")
 	.attr("cx", function(d) {
-            return xScale(d["naturalized"]);
+            return xScale(data["naturalized"]);
 	})
 	.attr("cy", function(d) {
             return yScale(d["inadmissible"]);
@@ -140,6 +143,8 @@ var plot = function(year) {
     
     ///////////////////////////////////////////////////////////////
     //Functions
+
+    ///*
     
     var bisect = d3.bisector(function(d) { return d[0]; });
     function interpolateValues(values, year) {
@@ -154,7 +159,7 @@ var plot = function(year) {
     }
     
     function interpolateData(year) {
-        return nations.map(function(d) {
+        return dataset["2005"].map(function(d) {
             return {
                 country: d.country,
                 total: interpolateValues(d.total, year),
@@ -181,7 +186,8 @@ var plot = function(year) {
         var year = d3.interpolateNumber(2005, 2014);
         return function(t) { plotYear(year(t)) }
     }
-    
+    //*/
+
     
     //Transistion
     /*
