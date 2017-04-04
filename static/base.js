@@ -103,6 +103,21 @@ var yScale = d3.scaleLinear()
     .domain([0, 1])
     .range([h, 0]);
 
+var tooltip = d3.select("body")
+    .append("div")
+    .style("position", "absolute")
+    .style("text-align", "center")
+    .style("width", "100px")
+    .style("height", "50px")
+    .style("padding", "2px")
+    .style("font", "12px sans-serif")
+    .style("background", "lightsteelblue")
+    .style("border", "0px")
+    .style("border-radius", "8px")
+    .style("z-index", "10")
+    .style("visibility", "hidden")
+
+
 
 
 var plot = function(year) {
@@ -137,8 +152,14 @@ var plot = function(year) {
 	})		    
 	.attr("r", function(d) {
 	    return d["total"]/10;
-	});
-
+	})
+    	.on("mouseover", function(d){
+	    tooltip.html(d["country"] + "<br/>"  + "Naturalized:" + d["naturalized"] + "<br/>" + "Inadmissible:" + d["inadmissible"]);
+	    return tooltip.style("visibility", "visible");})
+	.on("mousemove", function(){return tooltip.style("top",
+							 (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
+	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
+    
     //*/
     
     ///////////////////////////////////////////////////////////////
