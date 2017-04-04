@@ -79,10 +79,9 @@ var regionColors =
 
 
 //Takes an array from the dataset (aka 1 year) and
-//sorts it by <prop> in descending 
-var prop = "total";
-//.sort(function(a, b, prop){
-//    return parseInt(b.prop) - parseInt(a.prop);
+//sorts it by total in descending
+//.sort(function(a, b){
+//    return parseInt(b.total) - parseInt(a.total);
 //};
 
 
@@ -139,8 +138,87 @@ var plot = function(year) {
 
     //*/
     
+    ///////////////////////////////////////////////////////////////
+    //Functions
+    
+    var bisect = d3.bisector(function(d) { return d[0]; });
+    function interpolateValues(values, year) {
+        var i = bisect.left(values, year, 0, values.length - 1),
+            a = values[i];
+        if (i > 0) {
+            var b = values[i - 1],
+            t = (year - a[0]) / (b[0] - a[0]);
+            return a[1] * (1 - t) + b[1] * t;
+        }
+        return a[1];
+    }
+    
+    function interpolateData(year) {
+        return nations.map(function(d) {
+            return {
+                country: d.country,
+                total: interpolateValues(d.total, year),
+                inadmissable : interpolateValues(d.inadmissable, year),
+                naturalized: interpolateValues(d.naturalized, year),
+                highlight: d.highlight,
+                region: d.region
+            };
+        });
+    }
+    
+    function plotYear(year) {
+        dot.data(interpolateData(year), function(d){return d.country})
+            .call(updateDot);
+    }
+    
+    function updateDot(dot) {
+        dot .attr("cx", function(d) { return xScale(d["naturalized"]); })
+            .attr("cy", function(d) { return yScale(d["inadmissible"]); })
+            .attr("r", function(d) { return d["total"]/10; });
+    }
+
+    function tweenYear() {
+        var year = d3.interpolateNumber(2005, 2014);
+        return function(t) { plotYear(year(t)) }
+    }
     
     
+    //Transistion
+    /*
+    svg.transition()
+        .duration(20000)
+        .ease("linear")
+        .tween("year", tweenYear)
+        .each("end", enableInteraction);
+    
+    function enableInteraction() {
+    var yearScale = d3.scale.linear()
+        .domain([1800, 2009])
+        .range([box.x + 10, box.x + box.width - 10])
+        .clamp(true);
+
+    // Cancel the current transition, if any.
+    svg.transition().duration(0);
+
+    overlay
+        .on("mouseover", mouseover)
+        .on("mouseout", mouseout)
+        .on("mousemove", mousemove)
+        .on("touchmove", mousemove);
+
+    function mouseover() {
+      label.classed("active", true);
+    }
+
+    function mouseout() {
+      label.classed("active", false);
+    }
+
+    function mousemove() {
+      displayYear(yearScale.invert(d3.mouse(this)[0]));
+    }
+  }
+    //*/
     
     //////////////////////////////////////////////////////////////
     //////////////////////////////////////////////////////////////
