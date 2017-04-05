@@ -268,7 +268,7 @@ var plot = function(year) {
             "translate(" + (w/2) + " ," + 
                            (h + 40) + ")")
       .style("text-anchor", "middle")
-      .text("% Something");
+      .text("% Naturalized");
 
     svg.append("g")
 	.attr("class", "axis")
@@ -280,7 +280,7 @@ var plot = function(year) {
       .attr("x", -(h / 2))
       .attr("dy", "1em")
       .style("text-anchor", "middle")
-      .text("% Something");      
+      .text("% Inadmissible");      
 
 };
 
