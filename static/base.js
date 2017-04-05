@@ -123,14 +123,12 @@ var tooltip = d3.select("body")
 var plot = function(year) {
     ///*
 
-    var data = interpolateData(year);
-    
     svg.selectAll("circle")
 	.data(dataset[year.toString()])
 	.enter()
 	.append("circle")
 	.attr("cx", function(d) {
-            return xScale(data["naturalized"]);
+            return xScale(d["naturalized"]);
 	})
 	.attr("cy", function(d) {
             return yScale(d["inadmissible"]);
@@ -160,32 +158,62 @@ var plot = function(year) {
 							 (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
 	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
     
+    
+    
+    
+    
+    
+    
     //*/
+    
+    
+    // Due to the structure of the JSON object (dataset), I have concluded that it is 
+    // too difficult to attempt interpolating data to create seamless data
+    //
+    // Reason : We should have been keying the countries not the years
+    //          since JSON stores objects, which countries are more so
+    //          than years
+    //          Because it is structured by year, it makes it
+    //          extremely difficult to cross-reference country by year
+    //          data (e.g Canada inadmissable in 2006 vs Canada 
+    //          inadmissable in 2007) and passing functions that deal
+    //          with such. 
+    //          In other words, functions like interpolateValues 
+    //          cannot be generalized easily because it would have to 
+    //          search through every object in the next year for the same 
+    //          country to find the desired value for comparison
+    //          If it were by country 
+    //
+    // This feature was not implemented because of the unfortunate lack of foresight
+    // and partly my late realization of how the data should have been structured
+    // This will be a lesson learned
+    //  - Jerry
+    
+    
+    
     
     ///////////////////////////////////////////////////////////////
     //Functions
 
-    ///*
+    /*
     
-    var bisect = d3.bisector(function(d) { return d[0]; });
-    function interpolateValues(values, year) {
-        var i = bisect.left(values, year, 0, values.length - 1),
-            a = values[i];
-        if (i > 0) {
-            var b = values[i - 1],
-            t = (year - a[0]) / (b[0] - a[0]);
-            return a[1] * (1 - t) + b[1] * t;
-        }
-        return a[1];
+    
+    function interpolateValues(item, value, year) {
+        var est = d3.interpolateNumber(item[value])
+        return dataset[]
     }
     
+    //year can be float
     function interpolateData(year) {
-        return dataset["2005"].map(function(d) {
+        var old = (int)(Math.floor(year));
+        if ((float)(old) == year) 
+            return dataset[old.toString()];
+        return dataset[old.toString()].map(function(d) {
             return {
                 country: d.country,
-                total: interpolateValues(d.total, year),
-                inadmissable : interpolateValues(d.inadmissable, year),
-                naturalized: interpolateValues(d.naturalized, year),
+                total: interpolateValues(d.country, "total", year),
+                inadmissable : interpolateValues(d.country, "inadmissable", year),
+                naturalized: interpolateValues(d.country, "naturalized", year),
                 highlight: d.highlight,
                 region: d.region
             };
@@ -193,7 +221,8 @@ var plot = function(year) {
     }
     
     function plotYear(year) {
-        dot.data(interpolateData(year), function(d){return d.country})
+        svg.selectAll("circle")
+            .data(interpolateData(year), function(d){return d.country})
             .call(updateDot);
     }
     
@@ -216,38 +245,16 @@ var plot = function(year) {
         .duration(20000)
         .ease("linear")
         .tween("year", tweenYear)
-        .each("end", enableInteraction);
     
-    function enableInteraction() {
-    var yearScale = d3.scale.linear()
-        .domain([1800, 2009])
-        .range([box.x + 10, box.x + box.width - 10])
-        .clamp(true);
-
     // Cancel the current transition, if any.
     svg.transition().duration(0);
 
-    overlay
-        .on("mouseover", mouseover)
-        .on("mouseout", mouseout)
-        .on("mousemove", mousemove)
-        .on("touchmove", mousemove);
-
-    function mouseover() {
-      label.classed("active", true);
-    }
-
-    function mouseout() {
-      label.classed("active", false);
-    }
-
-    function mousemove() {
-      displayYear(yearScale.invert(d3.mouse(this)[0]));
-    }
-  }
+  
     //*/
     
     //////////////////////////////////////////////////////////////
+    
+    
     //////////////////////////////////////////////////////////////
     //Axes
     
@@ -277,4 +284,35 @@ var plot = function(year) {
 
 };
 
+function plotYear(year) {
+        svg.selectAll("circle")
+            .data(dataset[year.toString()], function(d){return d.country})
+            .call(updateDot);
+}
+
+function updateDot(dot) {
+        dot .attr("cx", function(d) { return xScale(d["naturalized"]); })
+            .attr("cy", function(d) { return yScale(d["inadmissible"]); })
+            .attr("r", function(d) { return d["total"]/10; });
+}
+
+function transition(year){
+   var t = d3.transition()
+             .duration(750)
+             .ease(d3.easeLinear);
+     
+   d3.selectAll("circles")
+     .transition(t)
+     .plotYear(year);
+
+}
+
+
+var slider = document.getElementById("time");
+
+var update = function(){
+    transition(slider.innerHTML);
+}
+
+slider.addEventListener("mouseup", update);
 plot(2005);
