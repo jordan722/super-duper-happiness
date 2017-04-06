@@ -1,13 +1,20 @@
-from flask import Flask, session, request, url_for, redirect, render_template
-#from utils import [...]
+import os
+import json
+from flask import Flask, render_template, request
+from utils import parser
 
 app = Flask(__name__)
-app.sekret_key = "key"
+app.secret_key = "key"
 
 
 @app.route("/")
 def root():
     return render_template("home.html")
+    
+@app.route("/getData")
+def retrieve():
+    return json.dumps(parser.to_json())
 
 if __name__ == '__main__':
-    app.run()
+    app.debug = True
+    app.run(host=os.getenv('IP', '0.0.0.0'),port=int(os.getenv('PORT', 8080)))

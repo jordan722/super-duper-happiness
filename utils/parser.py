@@ -1,7 +1,7 @@
 import csv
 import json
 
-filename = '../data/immigration.csv'
+filename = 'data/immigration.csv'
 fieldnames = ("Affirmative", "Apprehended", "Arrived", "Country", "Criminal", "Defensive Asylum", "Inadmissible", "Legal permanant residences.Birth", "Legal permanant residences.Last Residence", "Naturalizations (Birth)", "Non-criminal", "Nonimmigrant Admissions.Birth", "Nonimmigrant Admissions.Last Residence", "Year")
 
 def get_countries():
@@ -56,8 +56,8 @@ def country_dict(country, row):
     if tot == 0:
         return {}
     
-    inad = float( int(row['Inadmissible']) / tot )
-    nat = float( int(row['Naturalizations (Birth)']) / tot )
+    inad = int(row['Inadmissible']) / (float)(tot) 
+    nat =  int(row['Naturalizations (Birth)']) / (float)(tot)
 
     country_dict['country'] = country
     country_dict['total'] = tot
@@ -88,16 +88,19 @@ def year_list(year):
                     L += [cd]
 
     csvfile.close()
+    return L
 
 def to_json():
     
-    countries = get_countries()
-
+    #countries = get_countries()
+    #print countries
     d = {}
     for year in ['2005','2006','2007','2008','2009','2010','2011','2012','2013','2014']:
         d[year] = year_list(year)
 
-    with open('../data/immigration.json', 'w') as fp:
+    with open('data/immigration.json', 'w') as fp: 
         json.dump(d, fp)
+        
+    return d
 
-to_json()
+#print to_json()

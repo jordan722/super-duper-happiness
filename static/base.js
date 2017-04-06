@@ -1,5 +1,37 @@
 //Dummy test data
-var dataset =
+
+var dataset;
+var slider = document.getElementById("time");
+
+var update = function(){
+    makeRequest(slider.value);
+};
+
+$.ajax({
+	url: "/getData",
+	type: "GET",
+}).done(function(data){
+    dataset = JSON.parse(data);
+    //console.log(dataset);
+    plot(dataset, 2006);
+
+});
+slider.addEventListener("mouseup", update);
+
+function makeRequest(year){
+   $.ajax({
+	url: "/getData",
+	type: "GET",
+}).done(function(data){
+    dataset = JSON.parse(data);
+    //console.log("move!" + year);
+    transitiondata(year);
+
+});
+}
+   
+   
+   /*
     {
 	"2005": [
 	    {
@@ -55,6 +87,8 @@ var dataset =
 	    }
 	]
     };
+    
+    //*/
 
 var regionColors =
     {
@@ -92,12 +126,13 @@ var regionColors =
 
 var svg = d3.select("#svg");
 
+
 var w = 850;
 var h = 550;
 
 var xScale = d3.scaleLinear()
     .domain([0, 1])
-    .range([0, w]);
+    .range([0, 2*w]);
 
 var yScale = d3.scaleLinear()
     .domain([0, 1])
@@ -107,8 +142,8 @@ var tooltip = d3.select("body")
     .append("div")
     .style("position", "absolute")
     .style("text-align", "center")
-    .style("width", "100px")
-    .style("height", "50px")
+    .style("width", "210px")
+    .style("height", "70px")
     .style("padding", "2px")
     .style("font", "12px sans-serif")
     .style("background", "lightsteelblue")
@@ -120,21 +155,21 @@ var tooltip = d3.select("body")
 
 
 
-var plot = function(year) {
+var plot = function(dataset, year) {
     ///*
 
     svg.selectAll("circle")
 	.data(dataset[year.toString()])
 	.enter()
 	.append("circle")
-	.attr("cx", function(d) {
-            return xScale(d["naturalized"]);
-	})
-	.attr("cy", function(d) {
-            return yScale(d["inadmissible"]);
-	})
+	.call(updateDot)
+	.sort(order)
 	.attr("fill", function(d) {
-	    return regionColors[d["region"]];
+	    //console.log(d);
+	    //console.log(year.toString());
+	    //console.log(dataset);
+	    //return regionColors[d["region"]];
+	    return "green";
 	})
 	.attr("stroke", function(d) {
 	    //return regionColors[d["region"]];
@@ -145,21 +180,20 @@ var plot = function(year) {
 		return 1;
 	    }
 	    else {
-		return 0.5;
+		return 0.25;
 	    }
 	})		    
-	.attr("r", function(d) {
-	    return d["total"]/10;
-	})
+	
     	.on("mouseover", function(d){
-	    tooltip.html(d["country"] + "<br/>"  + "Naturalized:" + d["naturalized"] + "<br/>" + "Inadmissible:" + d["inadmissible"]);
+	    tooltip.html(d["country"] + "<br/>"  + "Naturalized:" + d["naturalized"] + "<br/>" + "Inadmissible:" + d["inadmissible"] + "<br/>" + "Total:" + d["total"]);
 	    return tooltip.style("visibility", "visible");})
 	.on("mousemove", function(){return tooltip.style("top",
 							 (d3.event.pageY-10)+"px").style("left",(d3.event.pageX+10)+"px");})
 	.on("mouseout", function(){return tooltip.style("visibility", "hidden");});
     
     
-    
+    //svg.selectAll("circle")
+	//.data(dataset[year.toString()])
     
     
     
@@ -268,7 +302,7 @@ var plot = function(year) {
             "translate(" + (w/2) + " ," + 
                            (h + 40) + ")")
       .style("text-anchor", "middle")
-      .text("% Something");
+      .text("% Naturalized");
 
     svg.append("g")
 	.attr("class", "axis")
@@ -276,43 +310,48 @@ var plot = function(year) {
     
     svg.append("text")
       .attr("transform", "rotate(-90)")
-      .attr("y", -65)
+      .attr("y", -40)
       .attr("x", -(h / 2))
       .attr("dy", "1em")
       .style("text-anchor", "middle")
-      .text("% Something");      
+      .text("% Inadmissible");      
 
 };
 
+function radius(d) {return d.total}
+
+function order(a, b) {
+    return radius(b) - radius(a);
+  }
+
 function plotYear(year) {
-        svg.selectAll("circle")
-            .data(dataset[year.toString()], function(d){return d.country})
-            .call(updateDot);
+        return svg.selectAll("circle")
+            .data(dataset[year.toString()], function(d){return d.country});
+        //svg.selectAll("circle").call(updateDot);
+        //console.log();
 }
 
 function updateDot(dot) {
-        dot .attr("cx", function(d) { return xScale(d["naturalized"]); })
-            .attr("cy", function(d) { return yScale(d["inadmissible"]); })
-            .attr("r", function(d) { return d["total"]/10; });
+        dot .attr("cx", function(d) { return xScale(d["naturalized"] * 10); })
+            .attr("cy", function(d) { return yScale(d["inadmissible"] * 100); })
+            .attr("r", function(d) { return d["total"]/50000; });
 }
 
-function transition(year){
+
+
+function transitiondata(year){
    var t = d3.transition()
-             .duration(750)
-             .ease(d3.easeLinear);
+             
+
+   plotYear(year)
+     .transition()
+       .duration(5000)
+       .ease(d3.easeLinear)
+     .call(updateDot);
      
-   d3.selectAll("circles")
-     .transition(t)
-     .plotYear(year);
-
 }
 
 
-var slider = document.getElementById("time");
 
-var update = function(){
-    transition(slider.innerHTML);
-}
 
-slider.addEventListener("mouseup", update);
-plot(2005);
+//plot(2005);
